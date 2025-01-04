@@ -27,7 +27,7 @@ classdef matching_network
             end
         end
         
-        function calc_l_series(obj)
+        function obj = calc_l_series(obj)
             
             % on complex sources calc Q and capacitor to  
             if  ~isreal(obj.R_s)
@@ -52,12 +52,12 @@ classdef matching_network
       
         end
 
-        function calc_network(obj)
+        function obj = calc_network(obj)
 
 
             switch obj.type
                 case network_types.L_ser
-                    obj.calc_l_series()
+                    obj = obj.calc_l_series();
                 case network_types.L_par
                     disp('Calculating L-par matching network...');
                 case network_types.T
@@ -67,6 +67,7 @@ classdef matching_network
                 otherwise
                     disp('Unknown matching network');
             end
+            
         end
     end
 end
