@@ -49,7 +49,7 @@ classdef matching_network
             obj.X_l1 = real(obj.R_s) / obj.Q;
             obj.X_l2 = real(obj.R_l) * obj.Q;
 
-            obj
+      
         end
 
         function calc_network(obj)
