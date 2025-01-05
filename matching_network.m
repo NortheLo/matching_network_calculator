@@ -29,7 +29,8 @@ classdef matching_network
         
         function obj = calc_l_series(obj)
             
-            % on complex sources calc Q and capacitor to  
+            % on complex sources calc Q of the resonance and 
+            % the component to compensate
             if  ~isreal(obj.R_s)
                 Q_comp = imag(obj.R_s) / real(obj.R_s);
                 R_par = (1 + Q_comp^2) * real(obj.R_s);
@@ -48,8 +49,19 @@ classdef matching_network
             obj.Q = sqrt(real(obj.R_s) / real(obj.R_l) - 1);
             obj.X_l1 = real(obj.R_s) / obj.Q;
             obj.X_l2 = real(obj.R_l) * obj.Q;
+        end
 
-      
+        function obj = calc_l_parallel(obj)
+            if  ~isreal(obj.R_s)
+                Q_comp = imag(obj.R_s) / real(obj.R_s);
+                R_par = (1 + Q_comp^2) * real(obj.R_s);
+                X_par = R_par / Q_comp;
+                obj.R_s = R_par + i * X_par;
+            end
+
+            obj.Q = sqrt(real(obj.R_s) / real(obj.R_l) - 1);
+            obj.X_l1 = real(obj.R_s) / obj.Q;
+            obj.X_l2 = real(obj.R_l) * obj.Q;
         end
 
         function obj = calc_network(obj)
@@ -57,7 +69,7 @@ classdef matching_network
                 case network_types.L_ser
                     obj = obj.calc_l_series();
                 case network_types.L_par
-                    disp('Calculating L-par matching network...');
+                    obj = obj.calc_l_parallel();
                 case network_types.T
                     disp('Calculating T matching network...');
                 case network_types.PI
