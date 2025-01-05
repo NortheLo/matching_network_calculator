@@ -27,7 +27,7 @@ classdef matching_network
             end
         end
         
-        function obj = calc_l_series(obj)
+        function obj = calc_l_network(obj)
             
             % on complex sources calc Q of the resonance and 
             % the component to compensate
@@ -35,7 +35,7 @@ classdef matching_network
                 Q_comp = imag(obj.R_s) / real(obj.R_s);
                 R_par = (1 + Q_comp^2) * real(obj.R_s);
                 X_par = R_par / Q_comp;
-                obj.R_s = R_par + i * X_par;
+                obj.R_s = R_par + 1i * X_par;
                 % depending on the source impedance choose inductor or
                 % capacitor to compensate
                 if imag(obj.R_s) < 0
@@ -51,29 +51,42 @@ classdef matching_network
             obj.X_l2 = real(obj.R_l) * obj.Q;
         end
 
-        function obj = calc_l_parallel(obj)
-            if  ~isreal(obj.R_s)
-                Q_comp = imag(obj.R_s) / real(obj.R_s);
-                R_par = (1 + Q_comp^2) * real(obj.R_s);
-                X_par = R_par / Q_comp;
-                obj.R_s = R_par + i * X_par;
-            end
+        function obj = calc_t_type(obj)
+            R_s_1 = (1 + obj.Q^2) * obj.R_l;
+            
+            % high Q l-network
+            obj.X_l1 = real(obj.R_l) * obj.Q;
+            obj.X_l2 = real(R_s_1) / obj.Q;
 
-            obj.Q = sqrt(real(obj.R_s) / real(obj.R_l) - 1);
+            % low Q l-network
+            obj.Q = sqrt(real(R_s_1) / real(obj.R_s) - 1);
+            
+            obj.X_l3 = real(R_s_1) / obj.Q;
+            obj.X_l4 = real(obj.R_s) * obj.Q;
+            
+        end
+        
+        function obj = calc_pi_type(obj)
+            R_l_new = real(obj.R_s) / (1 + obj.Q^2);
+            
             obj.X_l1 = real(obj.R_s) / obj.Q;
-            obj.X_l2 = real(obj.R_l) * obj.Q;
+            obj.X_l2 = obj.Q * R_l_new;
+            
+            obj.Q = sqrt(real(obj.R_l) / real(R_l_new) - 1);
+            obj.X_l3 = obj.Q * R_l_new;
+            obj.X_l4 = real(obj.R_l) / obj.Q;
         end
 
         function obj = calc_network(obj)
             switch obj.type
                 case network_types.L_ser
-                    obj = obj.calc_l_series();
+                    obj = obj.calc_l_network();
                 case network_types.L_par
-                    obj = obj.calc_l_parallel();
+                    obj = obj.calc_l_network();
                 case network_types.T
-                    disp('Calculating T matching network...');
+                    obj = obj.calc_t_type();
                 case network_types.PI
-                    disp('Calculating PI matching network...');
+                    obj = obj.calc_pi_type();
                 otherwise
                     disp('Unknown matching network');
             end
