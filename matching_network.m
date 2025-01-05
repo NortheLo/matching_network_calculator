@@ -53,8 +53,6 @@ classdef matching_network
         end
 
         function obj = calc_network(obj)
-
-
             switch obj.type
                 case network_types.L_ser
                     obj = obj.calc_l_series();
@@ -67,7 +65,14 @@ classdef matching_network
                 otherwise
                     disp('Unknown matching network');
             end
-            
+        end
+
+        function L = calc_inductance(obj, x_i)
+                L = x_i / obj.w;
+        end
+
+        function C = calc_capacitance(obj, x_c)
+                C = 1 / (obj.w * x_c);
         end
     end
 end
